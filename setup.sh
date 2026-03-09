@@ -102,6 +102,42 @@ install_zsh_plugins() {
 	bash "$script_dir/plugins.sh"
 }
 
+link_repo_custom_file() {
+	local file_name script_dir repo_file zsh_dir zsh_custom target_file backup_path
+	file_name="$1"
+	script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+	repo_file="$script_dir/zsh/custom/$file_name"
+	zsh_dir="${ZSH:-$HOME/.oh-my-zsh}"
+	zsh_custom="${ZSH_CUSTOM:-$zsh_dir/custom}"
+	target_file="$zsh_custom/$file_name"
+
+	if [[ ! -f "$repo_file" ]]; then
+		log "Repo custom file not found at $repo_file, skipping"
+		return
+	fi
+
+	mkdir -p "$zsh_custom"
+
+	if [[ -L "$target_file" ]] && [[ "$(readlink "$target_file")" == "$repo_file" ]]; then
+		log "$file_name symlink already configured"
+		return
+	fi
+
+	if [[ -e "$target_file" && ! -L "$target_file" ]]; then
+		backup_path="$target_file.backup.$(date +%Y%m%d%H%M%S)"
+		mv "$target_file" "$backup_path"
+		log "Backed up existing $file_name to $backup_path"
+	fi
+
+	ln -sfn "$repo_file" "$target_file"
+	log "Linked $target_file -> $repo_file"
+}
+
+link_repo_custom_files() {
+	link_repo_custom_file "aliases.zsh"
+	link_repo_custom_file "functions.zsh"
+}
+
 set_zsh_as_default_shell() {
 	local zsh_path
 	zsh_path="$(command -v zsh || true)"
@@ -135,6 +171,7 @@ set_zsh_as_default_shell() {
 main() {
 	install_zsh
 	install_oh_my_zsh
+	link_repo_custom_files
 	install_zsh_plugins
 	set_zsh_as_default_shell
 }
