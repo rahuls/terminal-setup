@@ -10,6 +10,30 @@ command_exists() {
 	command -v "$1" >/dev/null 2>&1
 }
 
+install_packages() {
+	if [[ "$#" -eq 0 ]]; then
+		return
+	fi
+
+	if command_exists apt-get; then
+		run_privileged apt-get update
+		run_privileged apt-get install -y "$@"
+	elif command_exists dnf; then
+		run_privileged dnf install -y "$@"
+	elif command_exists yum; then
+		run_privileged yum install -y "$@"
+	elif command_exists pacman; then
+		run_privileged pacman -Sy --noconfirm "$@"
+	elif command_exists zypper; then
+		run_privileged zypper --non-interactive install "$@"
+	elif command_exists brew; then
+		brew install "$@"
+	else
+		log "No supported package manager found. Install required packages manually: $*"
+		exit 1
+	fi
+}
+
 run_privileged() {
 	if command_exists sudo; then
 		sudo "$@"
@@ -30,26 +54,52 @@ install_zsh() {
 	fi
 
 	log "Installing zsh"
-
-	if command_exists apt-get; then
-		run_privileged apt-get update
-		run_privileged apt-get install -y zsh
-	elif command_exists dnf; then
-		run_privileged dnf install -y zsh
-	elif command_exists yum; then
-		run_privileged yum install -y zsh
-	elif command_exists pacman; then
-		run_privileged pacman -Sy --noconfirm zsh
-	elif command_exists zypper; then
-		run_privileged zypper --non-interactive install zsh
-	elif command_exists brew; then
-		brew install zsh
-	else
-		log "No supported package manager found. Install zsh manually and rerun this script."
-		exit 1
-	fi
+	install_packages zsh
 
 	log "zsh installation completed"
+}
+
+install_oh_my_zsh() {
+	local omz_dir
+	omz_dir="${ZSH:-$HOME/.oh-my-zsh}"
+
+	if [[ -d "$omz_dir" ]]; then
+		log "Oh My Zsh is already installed at $omz_dir"
+		return
+	fi
+
+	log "Installing Oh My Zsh"
+
+	if ! command_exists git; then
+		log "Installing missing dependency: git"
+		install_packages git
+	fi
+
+	if ! command_exists curl && ! command_exists wget; then
+		log "Installing missing dependency: curl"
+		install_packages curl
+	fi
+
+	if command_exists curl; then
+		RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+	else
+		RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(wget -qO- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+	fi
+
+	log "Oh My Zsh installation completed"
+}
+
+install_zsh_plugins() {
+	local script_dir
+	script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+	if [[ ! -f "$script_dir/plugins.sh" ]]; then
+		log "plugins.sh not found, skipping plugin install"
+		return
+	fi
+
+	chmod +x "$script_dir/plugins.sh"
+	bash "$script_dir/plugins.sh"
 }
 
 set_zsh_as_default_shell() {
@@ -84,6 +134,8 @@ set_zsh_as_default_shell() {
 
 main() {
 	install_zsh
+	install_oh_my_zsh
+	install_zsh_plugins
 	set_zsh_as_default_shell
 }
 
