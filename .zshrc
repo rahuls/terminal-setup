@@ -5,7 +5,9 @@ export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(zsh-bat you-should-use fzf git git-auto-fetch z zsh-autosuggestions zsh-syntax-highlighting fast-syntax-highlighting zsh-autocomplete)
 source $ZSH/oh-my-zsh.sh
+
 GIT_AUTO_FETCH_INTERVAL=300   
+
 alias bat="batcat"
 alias e="explorer.exe"
 alias p=pnpm
@@ -28,13 +30,7 @@ alias gcb="git pull && git checkout -b"
 alias gmd="git merge --no-edit origin/dev"
 alias gfa="git fetch --all"
 alias gsc='git stash push --keep-index -m "stash-unstaged"'
-alias zp='/home/rahul-hf/Projects/auro-platform'
-alias zw='/home/rahul-hf/Projects/auro-platform/apps/web'
-alias zu='/home/rahul-hf/Projects/auro-platform/packages/ui'
 alias t='turbo'
-alias tbw='zw && turbo build --filter="./"'
-alias tbp='zp && turbo build --filter="./"'
-alias tbc='turbo build --filter="./"'
 unalias gc 2>/dev/null
 gc() {
   if [ -z "$1" ]; then
@@ -102,9 +98,6 @@ complete -F _cc_complete cc
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  
-
-
-
 
 # pnpm
 export PNPM_HOME="/home/rahul-hf/.local/share/pnpm"
