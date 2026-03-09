@@ -58,6 +58,17 @@ Keep custom zsh files in repo at:
 
 If a real file already exists at either destination, it is backed up with a timestamp before linking.
 
+## Zshrc Management
+
+`scripts/setup.sh` calls `scripts/zshrc.sh` to ensure `~/.zshrc` contains:
+
+- `ZSH_THEME="powerlevel10k/powerlevel10k"`
+- your plugin list
+- `source $ZSH/oh-my-zsh.sh`
+- `source ~/.p10k.zsh` (if present)
+
+Any existing non-managed lines in `~/.zshrc` are preserved below the managed block.
+
 ## Powerlevel10k
 
 `scripts/setup.sh` delegates theme setup to `scripts/theme.sh`.

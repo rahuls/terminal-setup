@@ -102,6 +102,19 @@ install_zsh_plugins() {
 	bash "$script_dir/plugins.sh"
 }
 
+setup_zshrc() {
+	local script_dir
+	script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+	if [[ ! -f "$script_dir/zshrc.sh" ]]; then
+		log "zshrc.sh not found, skipping .zshrc setup"
+		return
+	fi
+
+	chmod +x "$script_dir/zshrc.sh"
+	bash "$script_dir/zshrc.sh"
+}
+
 setup_zsh_theme() {
 	local script_dir
 	script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -185,6 +198,7 @@ set_zsh_as_default_shell() {
 main() {
 	install_zsh
 	install_oh_my_zsh
+	setup_zshrc
 	setup_zsh_theme
 	link_repo_custom_files
 	install_zsh_plugins

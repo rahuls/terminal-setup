@@ -4,16 +4,19 @@ SHELL := /usr/bin/env bash
 IMAGE ?= terminal-setup-test
 CONTAINER ?= terminal-setup-test
 
-.PHONY: help chmod setup plugins theme docker-build docker-run docker-run-detached docker-exec docker-stop docker-rm docker-logs
+.PHONY: help chmod setup zshrc plugins theme docker-build docker-run docker-run-detached docker-exec docker-stop docker-rm docker-logs
 
 help: ## Show available commands
 	@awk 'BEGIN {FS = ":.*##"; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*##/ {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 chmod: ## Make all setup scripts executable
-	chmod +x scripts/setup.sh scripts/plugins.sh scripts/theme.sh
+	chmod +x scripts/setup.sh scripts/zshrc.sh scripts/plugins.sh scripts/theme.sh
 
 setup: chmod ## Run full machine setup
 	./scripts/setup.sh
+
+zshrc: chmod ## Apply managed Oh My Zsh/theme/plugin lines to ~/.zshrc
+	./scripts/zshrc.sh
 
 plugins: chmod ## Install/update Oh My Zsh plugins only
 	./scripts/plugins.sh
