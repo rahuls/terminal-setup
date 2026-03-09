@@ -19,14 +19,14 @@ docker run --rm -it terminal-setup-test
 Inside the container:
 
 ```bash
-chmod +x setup.sh
-./setup.sh
+chmod +x scripts/setup.sh
+./scripts/setup.sh
 ```
 
 Notes:
 
 - Containers do not automatically run SSH.
-- `setup.sh` skips `chsh` when running in a container, since changing login shell is not needed there.
+- `scripts/setup.sh` skips `chsh` when running in a container, since changing login shell is not needed there.
 
 ## Custom Zsh Files
 
@@ -35,9 +35,27 @@ Keep custom zsh files in repo at:
 - `zsh/custom/aliases.zsh`
 - `zsh/custom/functions.zsh`
 
-`setup.sh` creates/updates these symlinks:
+`scripts/setup.sh` creates/updates these symlinks:
 
 - `~/.oh-my-zsh/custom/aliases.zsh -> <repo>/zsh/custom/aliases.zsh`
 - `~/.oh-my-zsh/custom/functions.zsh -> <repo>/zsh/custom/functions.zsh`
 
 If a real file already exists at either destination, it is backed up with a timestamp before linking.
+
+## Powerlevel10k
+
+`scripts/setup.sh` delegates theme setup to `scripts/theme.sh`.
+
+`scripts/theme.sh` installs Powerlevel10k into:
+
+`~/.oh-my-zsh/custom/themes/powerlevel10k`
+
+To reuse your existing prompt config without running `p10k configure`, place your config in repo at:
+
+`zsh/.p10k.zsh`
+
+Then `scripts/theme.sh` links:
+
+`~/.p10k.zsh -> <repo>/zsh/.p10k.zsh`
+
+If `zsh/.p10k.zsh` is not present, setup keeps any existing `~/.p10k.zsh` and does not run interactive init.

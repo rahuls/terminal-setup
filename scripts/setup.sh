@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run this script by chmod +x setup.sh && bash -n setup.sh
+# run this script by chmod +x scripts/setup.sh && bash -n scripts/setup.sh
 set -euo pipefail
 
 log() {
@@ -102,11 +102,25 @@ install_zsh_plugins() {
 	bash "$script_dir/plugins.sh"
 }
 
+setup_zsh_theme() {
+	local script_dir
+	script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+	if [[ ! -f "$script_dir/theme.sh" ]]; then
+		log "theme.sh not found, skipping theme setup"
+		return
+	fi
+
+	chmod +x "$script_dir/theme.sh"
+	bash "$script_dir/theme.sh"
+}
+
 link_repo_custom_file() {
-	local file_name script_dir repo_file zsh_dir zsh_custom target_file backup_path
+	local file_name script_dir repo_root repo_file zsh_dir zsh_custom target_file backup_path
 	file_name="$1"
 	script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-	repo_file="$script_dir/zsh/custom/$file_name"
+	repo_root="$(cd "$script_dir/.." && pwd)"
+	repo_file="$repo_root/zsh/custom/$file_name"
 	zsh_dir="${ZSH:-$HOME/.oh-my-zsh}"
 	zsh_custom="${ZSH_CUSTOM:-$zsh_dir/custom}"
 	target_file="$zsh_custom/$file_name"
@@ -171,6 +185,7 @@ set_zsh_as_default_shell() {
 main() {
 	install_zsh
 	install_oh_my_zsh
+	setup_zsh_theme
 	link_repo_custom_files
 	install_zsh_plugins
 	set_zsh_as_default_shell
