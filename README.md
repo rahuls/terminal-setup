@@ -14,9 +14,12 @@ Common usage:
 
 ```bash
 make setup
+make uninstall
 make docker-build
 make docker-run
 ```
+
+`make uninstall` removes Oh My Zsh/Powerlevel10k setup, cleans terminal-setup managed `.zshrc` entries, and switches default shell back to bash.
 
 ## Test in Docker (Ubuntu)
 
