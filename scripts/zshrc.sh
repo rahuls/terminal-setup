@@ -19,7 +19,7 @@ rewrite_zshrc() {
   touch "$zshrc"
 
   awk -v start="$START_MARKER" -v end="$END_MARKER" '
-    BEGIN { in_block=0; hb_block=0; znap_block=0 }
+    BEGIN { in_block=0; hb_block=0; znap_block=0; plugins_block=0; plugins_comment_context=0 }
     $0 == start { in_block=1; next }
     $0 == end { in_block=0; next }
     in_block { next }
@@ -34,9 +34,17 @@ rewrite_zshrc() {
       next
     }
 
+    plugins_block {
+      if ($0 ~ /^[[:space:]]*\)[[:space:]]*$/) { plugins_block=0 }
+      next
+    }
+
     /^[[:space:]]*export[[:space:]]+ZSH=/ { next }
     /^[[:space:]]*ZSH_THEME=/ { next }
-    /^[[:space:]]*plugins=\(/ { next }
+    /^[[:space:]]*plugins=\(/ {
+      if ($0 !~ /\)[[:space:]]*$/) { plugins_block=1 }
+      next
+    }
     /^[[:space:]]*source[[:space:]]+\$ZSH\/oh-my-zsh\.sh/ { next }
     /^[[:space:]]*\[\[[[:space:]]*![[:space:]]*-f[[:space:]]+~\/\.p10k\.zsh[[:space:]]*\]\][[:space:]]*\|\|[[:space:]]*source[[:space:]]+~\/\.p10k\.zsh/ { next }
     /^[[:space:]]*HB_CNF_HANDLER=/ { next }
@@ -51,6 +59,12 @@ rewrite_zshrc() {
     /\.oh-my-zsh\/custom\/plugins\/zsh-z\/zsh-z\.plugin\.zsh/ { next }
     /^[[:space:]]*export[[:space:]]+PATH=\/opt\/homebrew\/bin:\$PATH[[:space:]]*$/ { next }
 
+    /Add wisely, as too many plugins slow down shell startup\./ { plugins_comment_context=1; print; next }
+
+    plugins_comment_context && /^[[:space:]]*$/ { plugins_comment_context=0; print; next }
+    plugins_comment_context && /^[[:space:]]*[a-zA-Z0-9_-]+[[:space:]]*$/ { next }
+    plugins_comment_context && /^[[:space:]]*\)[[:space:]]*$/ { plugins_comment_context=0; next }
+
     { print }
   ' "$zshrc" > "$tmp"
 
@@ -63,13 +77,13 @@ fi
 
 # Ensure Homebrew is on PATH and initialize command-not-found (macOS).
 if [[ -x /opt/homebrew/bin/brew ]]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+  eval "\$(/opt/homebrew/bin/brew shellenv)"
 elif [[ -x /usr/local/bin/brew ]]; then
-  eval "$(/usr/local/bin/brew shellenv)"
+  eval "\$(/usr/local/bin/brew shellenv)"
 fi
 
 if command -v brew >/dev/null 2>&1; then
-  eval "$(brew command-not-found-init 2>/dev/null)"
+  eval "\$(brew command-not-found-init 2>/dev/null)"
 fi
 
 export ZSH="\$HOME/.oh-my-zsh"
