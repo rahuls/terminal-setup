@@ -2,6 +2,22 @@
 
 Bootstrap script and shell config to quickly set up a new machine.
 
+## Make Commands
+
+List available commands:
+
+```bash
+make help
+```
+
+Common usage:
+
+```bash
+make setup
+make docker-build
+make docker-run
+```
+
 ## Test in Docker (Ubuntu)
 
 Build image from this repo:
