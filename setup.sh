@@ -10,6 +10,19 @@ command_exists() {
 	command -v "$1" >/dev/null 2>&1
 }
 
+run_privileged() {
+	if command_exists sudo; then
+		sudo "$@"
+	else
+		"$@"
+	fi
+}
+
+is_container() {
+	[[ -f /.dockerenv ]] && return 0
+	grep -qaE 'docker|containerd|kubepods' /proc/1/cgroup 2>/dev/null
+}
+
 install_zsh() {
 	if command_exists zsh; then
 		log "zsh is already installed"
@@ -19,16 +32,16 @@ install_zsh() {
 	log "Installing zsh"
 
 	if command_exists apt-get; then
-		sudo apt-get update
-		sudo apt-get install -y zsh
+		run_privileged apt-get update
+		run_privileged apt-get install -y zsh
 	elif command_exists dnf; then
-		sudo dnf install -y zsh
+		run_privileged dnf install -y zsh
 	elif command_exists yum; then
-		sudo yum install -y zsh
+		run_privileged yum install -y zsh
 	elif command_exists pacman; then
-		sudo pacman -Sy --noconfirm zsh
+		run_privileged pacman -Sy --noconfirm zsh
 	elif command_exists zypper; then
-		sudo zypper --non-interactive install zsh
+		run_privileged zypper --non-interactive install zsh
 	elif command_exists brew; then
 		brew install zsh
 	else
@@ -56,7 +69,12 @@ set_zsh_as_default_shell() {
 	# Ensure zsh is present in allowed shells before changing login shell.
 	if command_exists grep && [[ -r /etc/shells ]] && ! grep -qx "$zsh_path" /etc/shells; then
 		log "Adding $zsh_path to /etc/shells"
-		echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+		echo "$zsh_path" | run_privileged tee -a /etc/shells >/dev/null
+	fi
+
+	if is_container; then
+		log "Container environment detected. Skipping chsh (not required for container test runs)."
+		return
 	fi
 
 	log "Changing default shell to zsh (you may need to enter your password)"
