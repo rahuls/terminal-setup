@@ -65,3 +65,17 @@ rmnode() {
   echo "Done removing all node_modules in the monorepo."
   echo "You are now in the monorepo root. Run 'pnpm i' when ready."
 }
+
+localip() {
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    ifconfig | awk '/inet / && $2 != "127.0.0.1" {print $2}' | sort -u
+    return
+  fi
+
+  if command -v ip >/dev/null 2>&1; then
+    ip -4 -o addr show scope global up | awk '{print $4}' | cut -d/ -f1 | sort -u
+    return
+  fi
+
+  ifconfig | awk '/inet / && $2 != "127.0.0.1" {print $2}' | sort -u
+}

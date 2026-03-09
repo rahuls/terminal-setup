@@ -21,3 +21,15 @@ alias gmd="git merge --no-edit origin/dev"
 alias gfa="git fetch --all"
 alias gsc='git stash push --keep-index -m "stash-unstaged"'
 alias t='turbo'
+alias sz="source ~/.zshrc"
+
+
+#brew aliases
+alias bw="brew"
+alias bwi="brew install"
+alias bwic="brew install --cask"
+alias bws="brew search"
+alias bwu="brew uninstall"
+alias bwl="brew list"
+alias bwc="brew cleanup"
+alias bwup="brew upgrade && brew cleanup && sudo softwareupdate -ia && mas upgrade"
