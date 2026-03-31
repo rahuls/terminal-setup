@@ -79,3 +79,21 @@ localip() {
 
   ifconfig | awk '/inet / && $2 != "127.0.0.1" {print $2}' | sort -u
 }
+
+# DNS cache clear function - works on both macOS and Ubuntu
+dnsclear() {
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    echo "Clearing DNS cache on macOS..."
+    sudo dscacheutil -flushcache
+    sudo killall -HUP mDNSResponder
+    echo "DNS cache cleared ✓"
+  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Ubuntu/Linux with systemd-resolve
+    echo "Clearing DNS cache on Linux..."
+    sudo systemctl restart systemd-resolved
+    echo "DNS cache cleared ✓"
+  else
+    echo "OS not supported. Use 'uname -s' to check your system."
+  fi
+}
