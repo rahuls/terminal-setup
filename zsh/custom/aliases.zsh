@@ -49,3 +49,5 @@ alias dcud="d compose up -d"
 alias dcd="d compose down"
 alias dcl="d compose logs -f"
 alias dcb="d compose build"
+
+alias py="python3"
