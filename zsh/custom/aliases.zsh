@@ -1,4 +1,16 @@
-alias cat="bat"
+cat() {
+	local cat_viewer
+
+	for cat_viewer in bat batcat; do
+		cat_viewer="$(whence -p "$cat_viewer" 2>/dev/null)"
+		if [[ -n "$cat_viewer" ]]; then
+			"$cat_viewer" "$@"
+			return
+		fi
+	done
+
+	command cat "$@"
+}
 alias e="explorer.exe"
 alias p="pnpm"
 alias pa="p add"
@@ -22,7 +34,6 @@ alias gfa="git fetch --all"
 alias gsc='git stash push --keep-index -m "stash-unstaged"'
 alias t='turbo'
 alias sz="source ~/.zshrc"
-
 
 #brew aliases
 alias bw="brew"
