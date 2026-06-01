@@ -1,4 +1,4 @@
-alias bat="batcat"
+alias cat="bat"
 alias e="explorer.exe"
 alias p="pnpm"
 alias pa="p add"
