@@ -97,3 +97,60 @@ dnsclear() {
     echo "OS not supported. Use 'uname -s' to check your system."
   fi
 }
+
+# Best-effort lossless transcode: HEVC gives a strong size reduction without dropping quality.
+vcompress() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: vcompress <input-video> [output-format|output-video]"
+    return 1
+  fi
+
+  if [[ ! -f "$1" ]]; then
+    echo "File not found: $1"
+    return 1
+  fi
+
+  if ! command -v ffmpeg >/dev/null 2>&1; then
+    echo "ffmpeg is not installed"
+    return 1
+  fi
+
+  local input_file="$1"
+  local output_target="$2"
+  local output_file
+  local output_ext="mkv"
+  local -a subtitle_args
+  local -a container_args
+
+  if [[ -z "$output_target" ]]; then
+    local input_dir="${input_file:h}"
+    local input_name="${input_file:t:r}"
+    output_file="${input_dir}/${input_name}_lossless.${output_ext}"
+  elif [[ "$output_target" == */* || "$output_target" == *.* ]]; then
+    output_file="$output_target"
+    output_ext="${output_file:e:l}"
+  else
+    output_ext="${output_target:l}"
+    local input_dir="${input_file:h}"
+    local input_name="${input_file:t:r}"
+    output_file="${input_dir}/${input_name}_lossless.${output_ext}"
+  fi
+
+  case "$output_ext" in
+    mp4|m4v|mov)
+      subtitle_args=(-c:s mov_text)
+      container_args=(-tag:v hvc1 -movflags +faststart)
+      ;;
+    *)
+      subtitle_args=(-c:s copy)
+      container_args=()
+      ;;
+  esac
+
+  ffmpeg -hide_banner -y -i "$input_file" \
+    -map 0 -map_metadata 0 -map_chapters 0 \
+    -c:v libx265 -preset veryslow -x265-params lossless=1 \
+    -c:a copy "${subtitle_args[@]}" "${container_args[@]}" \
+    "$output_file"
+}
+
