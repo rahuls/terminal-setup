@@ -49,3 +49,6 @@ alias dcl="d compose logs -f"
 alias dcb="d compose build"
 
 alias py="python3"
+
+# opencode
+alias oc="opencode"
